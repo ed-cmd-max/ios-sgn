@@ -1,0 +1,3 @@
+version: 1
+bundleID: ec.novitec.sgntickets
+infoPath: Info.plist

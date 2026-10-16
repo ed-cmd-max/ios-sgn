@@ -1,0 +1,64 @@
+name: SGNTickets
+options:
+  bundleIdPrefix: ec.novitec
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+
+targets:
+  SGNTickets:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources/MiProyecto
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ec.novitec.sgntickets
+        PRODUCT_NAME: SGNTickets
+        SWIFT_VERSION: "6.0"
+        IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: SGN Tickets
+        INFOPLIST_KEY_NSFaceIDUsageDescription: Usa Face ID o Touch ID para iniciar sesión en SGN Tickets.
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: Usa el micrófono para grabar notas de voz en el chat de tickets.
+        INFOPLIST_KEY_NSPhotoLibraryUsageDescription: Selecciona una foto para tu perfil de SGN Tickets.
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        ENABLE_PREVIEWS: YES
+  SGNTicketsTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests/MiProyectoTests
+    dependencies:
+      - target: SGNTickets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ec.novitec.sgntickets.tests
+        SWIFT_VERSION: "6.0"
+        IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+
+  SGNTicketsUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Tests/MiProyectoUITests
+    dependencies:
+      - target: SGNTickets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ec.novitec.sgntickets.uitests
+        SWIFT_VERSION: "6.0"
+        IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+        TEST_TARGET_NAME: SGNTickets
+
+schemes:
+  SGNTickets:
+    build:
+      targets:
+        SGNTickets: all
+    test:
+      targets:
+        - SGNTicketsTests
+        - SGNTicketsUITests
+    gatherCoverageData: true
