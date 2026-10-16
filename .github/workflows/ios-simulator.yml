@@ -1,37 +1,16 @@
-name: iOS Simulator Tests
+- name: Run Tests
+        run: |
+          # Detectar el primer simulador de iPhone disponible en el runner
+          DEST_ID=$(xcrun simctl list devices available | grep -m 1 "iPhone" | sed -E 's/.*\(([0-9A-F-]+)\).*/\1/')
+          echo "Usando simulador con ID: $DEST_ID"
+          
+          # Encender el simulador
+          xcrun simctl boot "$DEST_ID" || true
 
-on:
-  pull_request:
-  push:
-  workflow_dispatch:
-
-permissions:
-  contents: read
-
-jobs:
-  build-and-test:
-    runs-on: macos-15
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install XcodeGen
-        run: brew install xcodegen
-      - name: Generate Xcode project
-        run: xcodegen generate
-      - name: Build and test in iOS Simulator
-        run: >-
-          xcodebuild test
-          -project SGNTickets.xcodeproj
-          -scheme SGNTickets
-          -destination 'platform=iOS Simulator,name=iPhone 16'
-          -resultBundlePath TestResults.xcresult
-          CODE_SIGNING_ALLOWED=NO
-      - name: Export screenshots
-        if: always()
-        run: xcrun xcresulttool export attachments --path TestResults.xcresult --output-path screenshots
-      - name: Upload simulator screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-simulator-screenshots
-          path: screenshots/
-          if-no-files-found: warn
+          # Ejecutar los tests apuntando al ID obtenido
+          xcodebuild test \
+            -project SGNTickets.xcodeproj \
+            -scheme SGNTickets \
+            -destination "platform=iOS Simulator,id=$DEST_ID" \
+            -resultBundlePath TestResults.xcresult \
+            CODE_SIGNING_ALLOWED=NO
