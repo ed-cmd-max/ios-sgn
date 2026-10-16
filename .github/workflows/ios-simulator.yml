@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set Xcode Version
-        run: sudo xcode-select -s /Applications/Xcode_16.0.app || sudo xcode-select -s /Applications/Xcode_16.app || sudo xcode-select -s /Applications/Xcode_16.1.app || sudo xcode-select -s /Applications/Xcode_16.2.app
+        run: sudo xcode-select -s /Applications/Xcode_16.1.app || sudo xcode-select -s /Applications/Xcode_16.0.app || true
 
       - name: Install XcodeGen
         run: brew install xcodegen
@@ -23,13 +23,14 @@ jobs:
       - name: Generate Xcode Project
         run: xcodegen generate
 
-      - name: Run Tests
+      - name: Run Tests and Capture
         run: |
+          # Detectar y encender el primer iPhone disponible
           DEST_ID=$(xcrun simctl list devices available | grep -m 1 "iPhone" | sed -E 's/.*\(([0-9A-F-]+)\).*/\1/')
-          echo "Usando simulador con ID: $DEST_ID"
-
+          echo "Simulador destino: $DEST_ID"
           xcrun simctl boot "$DEST_ID" || true
 
+          # Ejecutar las pruebas
           xcodebuild test \
             -project SGNTickets.xcodeproj \
             -scheme SGNTickets \
@@ -37,9 +38,25 @@ jobs:
             -resultBundlePath TestResults.xcresult \
             CODE_SIGNING_ALLOWED=NO
 
+          # Instalar y ejecutar la app en el simulador
+          APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "SGNTickets.app" | head -n 1)
+          xcrun simctl install "$DEST_ID" "$APP_PATH"
+          xcrun simctl launch "$DEST_ID" ec.novitec.sgntickets
+
+          # Pausa para renderizado y captura
+          sleep 5
+          xcrun simctl io "$DEST_ID" screenshot simulator_screenshot.png
+
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: TestResults.xcresult
+
+      - name: Upload Screenshot Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iphone-simulator-screenshot
+          path: simulator_screenshot.png
