@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set Xcode Version
-        run: sudo xcode-select -s /Applications/Xcode_15.4.app || sudo xcode-select -s /Applications/Xcode_16.0.app || true
+        run: sudo xcode-select -s /Applications/Xcode_16.0.app || sudo xcode-select -s /Applications/Xcode_16.app || sudo xcode-select -s /Applications/Xcode_16.1.app || sudo xcode-select -s /Applications/Xcode_16.2.app
 
       - name: Install XcodeGen
         run: brew install xcodegen
@@ -25,14 +25,11 @@ jobs:
 
       - name: Run Tests
         run: |
-          # Detectar el primer simulador de iPhone disponible en el runner
           DEST_ID=$(xcrun simctl list devices available | grep -m 1 "iPhone" | sed -E 's/.*\(([0-9A-F-]+)\).*/\1/')
           echo "Usando simulador con ID: $DEST_ID"
 
-          # Encender el simulador
           xcrun simctl boot "$DEST_ID" || true
 
-          # Ejecutar los tests apuntando al ID obtenido
           xcodebuild test \
             -project SGNTickets.xcodeproj \
             -scheme SGNTickets \
