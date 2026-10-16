@@ -23,29 +23,19 @@ jobs:
       - name: Generate Xcode Project
         run: xcodegen generate
 
-      - name: Run Tests and Capture
+      - name: Run Tests and Generate All Screenshots
         run: |
-          # Detectar y encender el primer iPhone disponible
+          mkdir -p screenshots
           DEST_ID=$(xcrun simctl list devices available | grep -m 1 "iPhone" | sed -E 's/.*\(([0-9A-F-]+)\).*/\1/')
           echo "Simulador destino: $DEST_ID"
           xcrun simctl boot "$DEST_ID" || true
 
-          # Ejecutar las pruebas
           xcodebuild test \
             -project SGNTickets.xcodeproj \
             -scheme SGNTickets \
             -destination "platform=iOS Simulator,id=$DEST_ID" \
             -resultBundlePath TestResults.xcresult \
             CODE_SIGNING_ALLOWED=NO
-
-          # Instalar y ejecutar la app en el simulador
-          APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "SGNTickets.app" | head -n 1)
-          xcrun simctl install "$DEST_ID" "$APP_PATH"
-          xcrun simctl launch "$DEST_ID" ec.novitec.sgntickets
-
-          # Pausa para renderizado y captura
-          sleep 5
-          xcrun simctl io "$DEST_ID" screenshot simulator_screenshot.png
 
       - name: Upload Test Results
         if: always()
@@ -54,9 +44,9 @@ jobs:
           name: test-results
           path: TestResults.xcresult
 
-      - name: Upload Screenshot Artifact
+      - name: Upload All App Screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: iphone-simulator-screenshot
-          path: simulator_screenshot.png
+          name: todas-las-capturas-iphone
+          path: screenshots/
