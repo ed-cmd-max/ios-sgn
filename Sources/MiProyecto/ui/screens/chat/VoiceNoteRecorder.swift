@@ -22,7 +22,7 @@ final class VoiceNoteRecorder: ObservableObject {
 
         do {
             let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetoothHFP])
+            try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
             try session.setActive(true)
 
             let directory = FileManager.default.temporaryDirectory.appendingPathComponent("sgn-chat-audio", isDirectory: true)
